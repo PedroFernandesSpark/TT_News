@@ -49,7 +49,7 @@ func count(text string) {
 	if err != nil {
 		log.Panic(err)
 	}
-	fmt.Print("twittes: " + text + "\n")
+	fmt.Print("twitees: " + text + "\n")
 	for i := 0; i < len(metaBytes); i++ {
 		if string(metaBytes[i]) >= "0" && string(metaBytes[i]) <= "9" {
 			count = append(count, string(metaBytes[i]))
@@ -66,6 +66,46 @@ func RemoveIndex(s []rune) string {
 	return string(ret)
 }
 
+func topTen(text string) {
+	token := "AAAAAAAAAAAAAAAAAAAAAHqTbwEAAAAAwm73WtWFdTK4m0wPh3nlaTMvBCI%3D7v2x6p9N7HWv7v5xhjxBlGepC16oF2xPiBrqHxCQR6OI9Vlotq"
+	query := ""
+	query = string(text)
+	flag.Parse()
+
+	client := &twitter.Client{
+		Authorizer: authorize{
+			Token: token,
+		},
+		Client: http.DefaultClient,
+		Host:   "https://api.twitter.com",
+	}
+	opts := twitter.TweetRecentSearchOpts{
+		Expansions:  []twitter.Expansion{twitter.ExpansionEntitiesMentionsUserName, twitter.ExpansionAuthorID},
+		TweetFields: []twitter.TweetField{twitter.TweetFieldCreatedAt, twitter.TweetFieldConversationID, twitter.TweetFieldAttachments},
+	}
+
+	fmt.Println("Callout to tweet recent search callout")
+
+	tweetResponse, err := client.TweetRecentSearch(context.Background(), query, opts)
+
+	dictionaries := tweetResponse.Raw.TweetDictionaries()
+
+	enc, err := json.MarshalIndent(dictionaries, "", "    ")
+	if err != nil {
+		log.Panic(err)
+	}
+
+	fmt.Println(string(enc))
+
+	metaBytes, err := json.MarshalIndent(tweetResponse.Meta, "", "    ")
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Print("twitees: " + text + "\n")
+	fmt.Println(string(metaBytes))
+	fmt.Print("\n")
+}
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Entre sua frase:")
@@ -76,14 +116,27 @@ func main() {
 	for i := 0; i < len(phrase); i++ {
 		if !slices.Contains(stopwords, phrase[i]) {
 			tags = append(tags, phrase[i])
-
 		}
 	}
+	fmt.Print("Número de Twitees para cada hashtag da frase digitada:" + "\n")
 	for i := 0; i < len(tags); i++ {
 		if int((" " + tags[i])[len(tags[i])]) == 10 {
 			count(("#" + RemoveIndex([]rune(tags[i]))))
+			topTen(("#" + RemoveIndex([]rune(tags[i]))))
 		} else {
 			count(("#" + tags[i]))
+			topTen(("#" + tags[i]))
+		}
+	}
+	fmt.Print("\n")
+	fmt.Print("///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+	fmt.Print("\n")
+	fmt.Print("Top 10 Twitees para cada hashtag da frase digitada:" + "\n")
+	for i := 0; i < len(tags); i++ {
+		if int((" " + tags[i])[len(tags[i])]) == 10 {
+			topTen(("#" + RemoveIndex([]rune(tags[i]))))
+		} else {
+			topTen(("#" + tags[i]))
 		}
 	}
 
