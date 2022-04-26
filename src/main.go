@@ -15,7 +15,58 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func getText() {
+type authorize struct {
+	Token string
+}
+
+func (a authorize) Add(req *http.Request) {
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.Token))
+}
+
+func count(text string) {
+	count := []string{}
+	token := "AAAAAAAAAAAAAAAAAAAAAHqTbwEAAAAAwm73WtWFdTK4m0wPh3nlaTMvBCI%3D7v2x6p9N7HWv7v5xhjxBlGepC16oF2xPiBrqHxCQR6OI9Vlotq"
+	query := ""
+	query = string(text)
+	flag.Parse()
+
+	client := &twitter.Client{
+		Authorizer: authorize{
+			Token: token,
+		},
+		Client: http.DefaultClient,
+		Host:   "https://api.twitter.com",
+	}
+	opts := twitter.TweetRecentCountsOpts{
+		Granularity: twitter.GranularityHour,
+	}
+
+	tweetResponse, err := client.TweetRecentCounts(context.Background(), query, opts)
+	if err != nil {
+		log.Panicf("tweet recent counts error: %v", err)
+	}
+	metaBytes, err := json.MarshalIndent(tweetResponse.Meta, "", "    ")
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Print("twittes: " + text + "\n")
+	for i := 0; i < len(metaBytes); i++ {
+		if string(metaBytes[i]) >= "0" && string(metaBytes[i]) <= "9" {
+			count = append(count, string(metaBytes[i]))
+		}
+	}
+	fmt.Print(strings.Join(count, "") + "\n")
+}
+
+func RemoveIndex(s []rune) string {
+	ret := []rune{}
+	for i := 0; i < len(s)-1; i++ {
+		ret = append(ret, s[i])
+	}
+	return string(ret)
+}
+
+func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Entre sua frase:")
 	tags := []string{}
@@ -25,53 +76,15 @@ func getText() {
 	for i := 0; i < len(phrase); i++ {
 		if !slices.Contains(stopwords, phrase[i]) {
 			tags = append(tags, phrase[i])
+
 		}
 	}
-	fmt.Print(tags)
-}
-
-type authorize struct {
-	Token string
-}
-
-func (a authorize) Add(req *http.Request) {
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.Token))
-}
-
-/**
-	In order to run, the user will need to provide the bearer token and the list of tweet ids.
-**/
-func main() {
-	token := flag.String("token", "AAAAAAAAAAAAAAAAAAAAAHqTbwEAAAAAwm73WtWFdTK4m0wPh3nlaTMvBCI%3D7v2x6p9N7HWv7v5xhjxBlGepC16oF2xPiBrqHxCQR6OI9Vlotq", "twitter API token")
-	query := flag.String("query", "#ucrania", "twitter query")
-	flag.Parse()
-
-	client := &twitter.Client{
-		Authorizer: authorize{
-			Token: *token,
-		},
-		Client: http.DefaultClient,
-		Host:   "https://api.twitter.com",
-	}
-	opts := twitter.TweetRecentCountsOpts{
-		Granularity: twitter.GranularityHour,
-	}
-
-	fmt.Println("Callout to tweet recent counts callout")
-
-	tweetResponse, err := client.TweetRecentCounts(context.Background(), *query, opts)
-	if err != nil {
-		log.Panicf("tweet recent counts error: %v", err)
-	}
-	metaBytes, err := json.MarshalIndent(tweetResponse.Meta, "", "    ")
-	if err != nil {
-		log.Panic(err)
-	}
-	for i := 0; i < len(metaBytes); i++ {
-		if string(metaBytes[i]) >= 0 && string(metaBytes[i]) <= 9 {
-			fmt.Println(string(metaBytes[i]))
+	for i := 0; i < len(tags); i++ {
+		if int((" " + tags[i])[len(tags[i])]) == 10 {
+			count(("#" + RemoveIndex([]rune(tags[i]))))
+		} else {
+			count(("#" + tags[i]))
 		}
-
 	}
-	fmt.Println(string(metaBytes))
+
 }
