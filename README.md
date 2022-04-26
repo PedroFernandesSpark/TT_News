@@ -6,5 +6,9 @@
 
 #### To run TT News you need:
 * Go lang
-* <go install>
-* <go run src/*.go>
+* Run ```go install``` in your terminal
+* Run ```go run src/*.go``` in your terminal
+* Type your phrase
+* Be happy
+
+### DONT FORGET TO GIVE US A SS AFTER ALL !
