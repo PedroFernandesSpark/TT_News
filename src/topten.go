@@ -11,6 +11,7 @@ import (
 	"github.com/g8rswimmer/go-twitter/v2"
 )
 
+// Função que recebe uma string e retorna os 10 tweets mais recentes feitos com a hashtag
 func topTen(text string) {
 	token := "AAAAAAAAAAAAAAAAAAAAAHqTbwEAAAAAwm73WtWFdTK4m0wPh3nlaTMvBCI%3D7v2x6p9N7HWv7v5xhjxBlGepC16oF2xPiBrqHxCQR6OI9Vlotq"
 	query := ""
