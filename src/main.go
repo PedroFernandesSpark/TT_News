@@ -26,4 +26,5 @@ func main() {
 			topTen(("#" + tags[i]))
 		}
 	}
+	wordCloud();
 }
