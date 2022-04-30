@@ -1,0 +1,13 @@
+{
+  "font_max_size": 300,
+  "font_min_size": 30,
+  "font_file":"../wordcloud/fonts/roboto/Roboto-Regular.ttf",
+  "width":2048,
+  "height":2048,
+  "random_placement":false,
+  "colors":[{"R":29,"G":161,"B":242,"A":255},{"R":29,"G":161,"B":242,"A":255},{"R":29,"G":161,"B":242,"A":255},{"R":29,"G":161,"B":242,"A":255}],
+  "mask":{
+    "file":"mask.png",
+    "maskColor":{"R":0,"G":0,"B":0,"A":0}
+  }
+}
