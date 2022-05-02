@@ -9,7 +9,7 @@
 
 #### To run TT News you need:
 * Go lang
-* Run ```go install``` in your terminal
+* Run ```go mod tidy``` in your terminal
 * Run ```go run src/*.go``` in your terminal
 * Type your phrase
 * Be happy
