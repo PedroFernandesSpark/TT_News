@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
 	"github.com/g8rswimmer/go-twitter/v2"
+	"github.com/tidwall/gjson"
+	"os"
+	
 )
 
 func topTen(text string) {
@@ -40,13 +42,84 @@ func topTen(text string) {
 		log.Panic(err)
 	}
 
-	fmt.Println(string(enc))
+	var j = []byte(string(enc))
+    c := make(map[string]json.RawMessage) // a map container to decode the JSON structure into
+    e := json.Unmarshal(j, &c) // unmarschal JSON
 
-	metaBytes, err := json.MarshalIndent(tweetResponse.Meta, "", "    ")
-	if err != nil {
-		log.Panic(err)
-	}
+    if e != nil { // panic on error
+        panic(e)
+    }
+
+    k := make([]string, len(c)) // a string slice to hold the keys
+
+    i := 0 // iteration counter
+    for s, _ := range c { // copy c's keys into k
+        k[i] = s
+        i++
+    }
+
 	fmt.Print("twitees: " + text + "\n")
-	fmt.Println(string(metaBytes))
-	fmt.Print("\n")
+
+	ttTextList := []string{}
+	for i := 0; i < len(k); i++ {
+
+		ttText := gjson.Get(string(enc), string(k[i] + ".Tweet.text"))
+		ttName := gjson.Get(string(enc), string(k[i] + ".Author.name"))
+		ttDate := gjson.Get(string(enc), string(k[i] + ".Tweet.created_at"))
+
+		println("Nome do usuario: " + ttName.String())
+		println("Texto: " + ttText.String())
+		println("Data: " + ttDate.String() + "\n")
+
+		println("- - - - - - - - - - - - - - - - - - - -\n")
+
+		auxList := []string{}
+		auxList = GetWords(ttText.Str)
+
+		for j := 0; j < len(auxList); j++ {
+			ttTextList = append(ttTextList, auxList[j])
+
+		}
+		
+	}
+
+	wordcloudText := make(map[string]int)
+	for i := 0; i < len(ttTextList); i++ {
+
+		wordcloudText[ttTextList[i]] = 1
+
+		for j := 0; j < len(ttTextList); j++ {
+
+			if ttTextList[i] == ttTextList[j] {
+				wordcloudText[ttTextList[i]] = wordcloudText[ttTextList[i]] + 1
+			}
+			
+		}
+	}
+
+	jsonString, err := json.Marshal(wordcloudText)
+
+	if err := os.Truncate("src/wordcloud/input.json", 0); err != nil {
+		log.Printf("Failed to truncate: %v", err)
+	}
+
+	file, err := os.OpenFile("src/wordcloud/input.json", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+
+	if err != nil {
+        panic(err)
+    }
+
+	_, err2 := file.Write(jsonString)
+
+	if err2 != nil {
+        log.Fatal(err2)
+    }
+
+	// metaBytes, err := json.MarshalIndent(tweetResponse.Meta, "", "    ")
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
+
+	// fmt.Println(string(metaBytes))
+	// fmt.Print("\n")
 }

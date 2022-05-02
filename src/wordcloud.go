@@ -103,7 +103,7 @@ func wordCloud() {
 	os.Chdir(filepath.Dir(*config))
 
 	confJson, _ := json.Marshal(conf)
-	fmt.Printf("Configuration: %s\n", confJson)
+	// fmt.Printf("Configuration: %s\n", confJson)
 	err = json.Unmarshal(confJson, &conf)
 	if err != nil {
 		fmt.Println(err)
