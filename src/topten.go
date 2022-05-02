@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+
 	"github.com/g8rswimmer/go-twitter/v2"
 	"github.com/tidwall/gjson"
-	"os"
-	
 )
 
 func topTen(text string) {
@@ -43,29 +43,29 @@ func topTen(text string) {
 	}
 
 	var j = []byte(string(enc))
-    c := make(map[string]json.RawMessage) // a map container to decode the JSON structure into
-    e := json.Unmarshal(j, &c) // unmarschal JSON
+	c := make(map[string]json.RawMessage) // a map container to decode the JSON structure into
+	e := json.Unmarshal(j, &c)            // unmarschal JSON
 
-    if e != nil { // panic on error
-        panic(e)
-    }
+	if e != nil { // panic on error
+		panic(e)
+	}
 
-    k := make([]string, len(c)) // a string slice to hold the keys
+	k := make([]string, len(c)) // a string slice to hold the keys
 
-    i := 0 // iteration counter
-    for s, _ := range c { // copy c's keys into k
-        k[i] = s
-        i++
-    }
+	i := 0                // iteration counter
+	for s, _ := range c { // copy c's keys into k
+		k[i] = s
+		i++
+	}
 
 	fmt.Print("twitees: " + text + "\n")
 
 	ttTextList := []string{}
 	for i := 0; i < len(k); i++ {
 
-		ttText := gjson.Get(string(enc), string(k[i] + ".Tweet.text"))
-		ttName := gjson.Get(string(enc), string(k[i] + ".Author.name"))
-		ttDate := gjson.Get(string(enc), string(k[i] + ".Tweet.created_at"))
+		ttText := gjson.Get(string(enc), string(k[i]+".Tweet.text"))
+		ttName := gjson.Get(string(enc), string(k[i]+".Author.name"))
+		ttDate := gjson.Get(string(enc), string(k[i]+".Tweet.created_at"))
 
 		println("Nome do usuario: " + ttName.String())
 		println("Texto: " + ttText.String())
@@ -80,7 +80,7 @@ func topTen(text string) {
 			ttTextList = append(ttTextList, auxList[j])
 
 		}
-		
+
 	}
 
 	wordcloudText := make(map[string]int)
@@ -93,27 +93,27 @@ func topTen(text string) {
 			if ttTextList[i] == ttTextList[j] {
 				wordcloudText[ttTextList[i]] = wordcloudText[ttTextList[i]] + 1
 			}
-			
+
 		}
 	}
 
 	jsonString, err := json.Marshal(wordcloudText)
 
-	if err := os.Truncate("src/wordcloud/input.json", 0); err != nil {
+	if err := os.Truncate("C:/Users/Spalko/Documents/TT_News/src/wordcloud/input.json", 0); err != nil {
 		log.Printf("Failed to truncate: %v", err)
 	}
 
-	file, err := os.OpenFile("src/wordcloud/input.json", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	file, err := os.OpenFile("C:/Users/Spalko/Documents/TT_News/src/wordcloud/input.json", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	if err != nil {
-        panic(err)
-    }
+		panic(err)
+	}
 
 	_, err2 := file.Write(jsonString)
 
 	if err2 != nil {
-        log.Fatal(err2)
-    }
+		log.Fatal(err2)
+	}
 
 	// metaBytes, err := json.MarshalIndent(tweetResponse.Meta, "", "    ")
 	// if err != nil {
